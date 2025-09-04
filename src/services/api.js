@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api/v1',
+  baseURL: 'https://madhutube-backend.onrender.com/api/v1',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
           const response = await axios.post(
-            'http://localhost:5000/api/v1/users/refresh-token',
+            'https://madhutube-backend.onrender.com/api/v1/users/refresh-token',
             { refreshToken },
             { withCredentials: true }
           );
