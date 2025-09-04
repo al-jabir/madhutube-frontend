@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import VideoCard from './VideoCard.jsx';
 import { ExclamationTriangleIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
+import { getRandomVideos } from '../../services/localVideoService.js';
 
 const VideoList = ({ apiCall, title, emptyMessage = "No videos found", category }) => {
     const [videos, setVideos] = useState([]);
@@ -13,26 +14,14 @@ const VideoList = ({ apiCall, title, emptyMessage = "No videos found", category 
                 setLoading(true);
                 setError(null);
 
-                // Simulate API call with mock data for demonstration
+                // Use local video data for demonstration
                 if (!apiCall) {
-                    // Generate mock videos for demonstration
-                    const mockVideos = Array.from({ length: 12 }, (_, index) => ({
-                        _id: `mock-${index + 1}`,
-                        title: `Amazing Video ${index + 1} - This is a sample video title that might be quite long`,
-                        thumbnail: `https://via.placeholder.com/320x180?text=Video+${index + 1}`,
-                        duration: Math.floor(Math.random() * 600) + 60,
-                        views: Math.floor(Math.random() * 1000000) + 1000,
-                        createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
-                        owner: {
-                            username: `creator${index + 1}`,
-                            fullName: `Content Creator ${index + 1}`,
-                            avatar: `https://via.placeholder.com/36x36?text=C${index + 1}`
-                        }
-                    }));
+                    // Get local videos with images
+                    const localVideos = getRandomVideos(12);
 
                     // Simulate network delay
                     setTimeout(() => {
-                        setVideos(mockVideos);
+                        setVideos(localVideos);
                         setLoading(false);
                     }, 1000);
                     return;

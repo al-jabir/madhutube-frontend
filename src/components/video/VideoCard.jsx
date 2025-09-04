@@ -7,10 +7,13 @@ import {
     EyeIcon,
     PlayIcon
 } from '@heroicons/react/24/outline';
+import { getThumbnail, getAvatar } from '../../services/assetService.js';
 
 const VideoCard = ({ video }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
+    const [imageError, setImageError] = useState(false);
+    const [avatarError, setAvatarError] = useState(false);
 
     const formatViews = (views) => {
         if (views >= 1000000) {
@@ -27,19 +30,54 @@ const VideoCard = ({ video }) => {
         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     };
 
-    // Placeholder data for demonstration
+    // Handle image loading errors
+    const handleImageError = () => {
+        setImageError(true);
+    };
+
+    const handleAvatarError = () => {
+        setAvatarError(true);
+    };
+
+    // Fallback data for demonstration with local images
     const videoData = video || {
         _id: '1',
         title: 'Sample Video Title - This is a placeholder video with a longer title to test the UI',
-        thumbnail: 'https://via.placeholder.com/320x180?text=Video+Thumbnail',
+        thumbnail: getThumbnail('video-1'),
         duration: 125,
         views: 1234567,
         createdAt: new Date(Date.now() - 86400000), // 1 day ago
         owner: {
             username: 'creator',
             fullName: 'Content Creator',
-            avatar: 'https://via.placeholder.com/36x36?text=Avatar'
+            avatar: getAvatar('avatar-1')
         }
+    };
+
+    // Get the thumbnail source with fallback
+    const getThumbnailSrc = () => {
+        if (imageError) {
+            return 'https://via.placeholder.com/320x180?text=Video+Thumbnail';
+        }
+        // If it's already an imported asset (string URL), use it directly
+        // If it's a path, try to get it from assets
+        if (typeof videoData.thumbnail === 'string' && videoData.thumbnail.startsWith('/images/')) {
+            return getThumbnail('video-1'); // fallback to local asset
+        }
+        return videoData.thumbnail || getThumbnail('video-1');
+    };
+
+    // Get the avatar source with fallback
+    const getAvatarSrc = () => {
+        if (avatarError) {
+            return 'https://via.placeholder.com/36x36?text=Avatar';
+        }
+        // If it's already an imported asset (string URL), use it directly
+        // If it's a path, try to get it from assets
+        if (typeof videoData.owner?.avatar === 'string' && videoData.owner?.avatar.startsWith('/images/')) {
+            return getAvatar('avatar-1'); // fallback to local asset
+        }
+        return videoData.owner?.avatar || getAvatar('avatar-1');
     };
 
     return (
@@ -53,10 +91,11 @@ const VideoCard = ({ video }) => {
                 <Link to={`/video/${videoData._id}`} className="block">
                     <div className="relative">
                         <img
-                            src={videoData.thumbnail}
+                            src={getThumbnailSrc()}
                             alt={videoData.title}
                             className="video-thumbnail group-hover:scale-105 transition-transform duration-300"
                             loading="lazy"
+                            onError={handleImageError}
                         />
 
                         {/* Hover overlay */}
@@ -104,10 +143,11 @@ const VideoCard = ({ video }) => {
                 {/* Channel Avatar */}
                 <Link to={`/channel/${videoData.owner?.username}`} className="flex-shrink-0">
                     <img
-                        src={videoData.owner?.avatar}
+                        src={getAvatarSrc()}
                         alt={videoData.owner?.username}
                         className="channel-avatar hover:scale-110 transition-transform duration-200"
                         loading="lazy"
+                        onError={handleAvatarError}
                     />
                 </Link>
 
