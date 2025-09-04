@@ -12,7 +12,7 @@ const Register = () => {
     coverImage: null,
   });
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { register, error, clearError } = useAuth();
   const navigate = useNavigate();
 
@@ -20,13 +20,13 @@ const Register = () => {
     e.preventDefault();
     setIsLoading(true);
     clearError();
-    
+
     const result = await register(formData);
-    
+
     if (result.success) {
       navigate('/');
     }
-    
+
     setIsLoading(false);
   };
 
@@ -67,7 +67,7 @@ const Register = () => {
               {error}
             </div>
           )}
-          
+
           <div className="space-y-4">
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -84,7 +84,7 @@ const Register = () => {
                 onChange={handleChange}
               />
             </div>
-            
+
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Username
@@ -100,7 +100,7 @@ const Register = () => {
                 onChange={handleChange}
               />
             </div>
-            
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Email
@@ -116,7 +116,7 @@ const Register = () => {
                 onChange={handleChange}
               />
             </div>
-            
+
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Password
@@ -132,22 +132,21 @@ const Register = () => {
                 onChange={handleChange}
               />
             </div>
-            
+
             <div>
               <label htmlFor="avatar" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Avatar (required)
+                Avatar (optional)
               </label>
               <input
                 id="avatar"
                 name="avatar"
                 type="file"
                 accept="image/*"
-                required
                 className="input-field"
                 onChange={handleChange}
               />
             </div>
-            
+
             <div>
               <label htmlFor="coverImage" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Cover Image (optional)
