@@ -10,7 +10,7 @@ export const useMediaQuery = (query) => {
 
     useEffect(() => {
         const mediaQuery = window.matchMedia(query);
-        
+
         // Set initial value
         setMatches(mediaQuery.matches);
 

@@ -63,7 +63,7 @@ export const useIntersectionObserver = (fetchMore, hasMore) => {
         (node) => {
             if (isFetching) return;
             if (element) element.disconnect();
-            
+
             const newObserver = new IntersectionObserver((entries) => {
                 if (entries[0].isIntersecting && hasMore) {
                     setIsFetching(true);

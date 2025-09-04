@@ -81,11 +81,11 @@ export const useAsyncWithRetry = (apiCall, options = {}) => {
                     const result = await apiCall(...args);
                     setData(result);
                     setRetryCount(0);
-                    
+
                     if (onSuccess) {
                         onSuccess(result);
                     }
-                    
+
                     return result;
                 } catch (err) {
                     if (attempt < maxRetries) {
@@ -94,11 +94,11 @@ export const useAsyncWithRetry = (apiCall, options = {}) => {
                         return attemptCall(attempt + 1);
                     } else {
                         setError(err);
-                        
+
                         if (onError) {
                             onError(err);
                         }
-                        
+
                         throw err;
                     }
                 }
