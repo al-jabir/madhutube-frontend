@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import {
+  EyeIcon,
+  EyeSlashIcon
+} from '@heroicons/react/24/outline';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -8,24 +12,25 @@ const Login = () => {
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
-  
+  const [showPassword, setShowPassword] = useState(false);
+
   const { login, error, clearError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const from = location.state?.from?.pathname || '/';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     clearError();
-    
+
     const result = await login(formData);
-    
+
     if (result.success) {
       navigate(from, { replace: true });
     }
-    
+
     setIsLoading(false);
   };
 
@@ -59,7 +64,7 @@ const Login = () => {
               {error}
             </div>
           )}
-          
+
           <div className="space-y-4">
             <div>
               <label htmlFor="usernameOrEmail" className="sr-only">
@@ -80,17 +85,39 @@ const Login = () => {
               <label htmlFor="password" className="sr-only">
                 Password
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="input-field"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  className="input-field pr-10"
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={handleChange}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  )}
+                </button>
+              </div>
             </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Link
+              to="/forgot-password"
+              className="text-sm text-youtube-red hover:text-red-700"
+            >
+              Forgot your password?
+            </Link>
           </div>
 
           <div>

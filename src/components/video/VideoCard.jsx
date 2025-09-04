@@ -75,13 +75,11 @@ const VideoCard = ({ video }) => {
                             </span>
                         )}
 
-                        {/* View count on hover */}
-                        {isHovered && (
-                            <div className="absolute top-2 left-2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded flex items-center space-x-1">
-                                <EyeIcon className="h-3 w-3" />
-                                <span>{formatViews(videoData.views)}</span>
-                            </div>
-                        )}
+                        {/* View count - always visible on mobile, hover on desktop */}
+                        <div className="absolute top-2 left-2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded flex items-center space-x-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
+                            <EyeIcon className="h-3 w-3" />
+                            <span>{formatViews(videoData.views)}</span>
+                        </div>
                     </div>
                 </Link>
 
@@ -102,7 +100,7 @@ const VideoCard = ({ video }) => {
             </div>
 
             {/* Video Info Section */}
-            <div className="mt-3 flex space-x-3">
+            <div className="mt-2 sm:mt-3 flex space-x-2 sm:space-x-3">
                 {/* Channel Avatar */}
                 <Link to={`/channel/${videoData.owner?.username}`} className="flex-shrink-0">
                     <img
@@ -123,12 +121,12 @@ const VideoCard = ({ video }) => {
 
                     <Link
                         to={`/channel/${videoData.owner?.username}`}
-                        className="block text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mt-1 transition-colors duration-200"
+                        className="block text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mt-1 transition-colors duration-200"
                     >
                         {videoData.owner?.fullName}
                     </Link>
 
-                    <div className="video-meta mt-1 flex items-center space-x-1">
+                    <div className="video-meta mt-1 flex items-center space-x-1 text-xs sm:text-sm">
                         <span>{formatViews(videoData.views)}</span>
                         <span>•</span>
                         <span>{formatDistanceToNow(new Date(videoData.createdAt), { addSuffix: true })}</span>
@@ -136,7 +134,7 @@ const VideoCard = ({ video }) => {
                 </div>
 
                 {/* Menu button for desktop */}
-                <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 sm:block hidden transition-opacity duration-200">
                     <button
                         className="btn-icon"
                         onClick={() => setShowMenu(!showMenu)}
@@ -144,11 +142,21 @@ const VideoCard = ({ video }) => {
                         <EllipsisVerticalIcon className="h-5 w-5" />
                     </button>
                 </div>
+
+                {/* Menu button for mobile - always visible */}
+                <div className="flex-shrink-0 sm:hidden block">
+                    <button
+                        className="btn-icon p-1"
+                        onClick={() => setShowMenu(!showMenu)}
+                    >
+                        <EllipsisVerticalIcon className="h-4 w-4" />
+                    </button>
+                </div>
             </div>
 
             {/* Dropdown Menu */}
             {showMenu && (
-                <div className="absolute top-0 right-0 mt-8 mr-2 w-48 bg-white dark:bg-youtube-gray rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-20">
+                <div className="absolute top-0 right-0 mt-8 mr-2 w-40 sm:w-48 bg-white dark:bg-youtube-gray rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-20">
                     <div className="py-1">
                         <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
                             Add to Watch Later

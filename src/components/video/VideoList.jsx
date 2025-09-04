@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import VideoCard from './VideoCard.jsx';
-import { videoAPI } from '../../services/videoService.js';
 import { ExclamationTriangleIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
 
 const VideoList = ({ apiCall, title, emptyMessage = "No videos found", category }) => {
@@ -57,9 +56,9 @@ const VideoList = ({ apiCall, title, emptyMessage = "No videos found", category 
         return (
             <div>
                 {title && (
-                    <h2 className="text-xl font-bold mb-4 px-6">{title}</h2>
+                    <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 px-2 sm:px-6">{title}</h2>
                 )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 px-2 sm:px-6">
                     {Array.from({ length: 12 }).map((_, index) => (
                         <div key={index} className="animate-pulse">
                             <div className="bg-gray-200 dark:bg-gray-700 aspect-video rounded-xl mb-3"></div>
@@ -81,7 +80,7 @@ const VideoList = ({ apiCall, title, emptyMessage = "No videos found", category 
     // Error state
     if (error) {
         return (
-            <div className="text-center p-12">
+            <div className="text-center p-6 sm:p-12 mx-4 sm:mx-6">
                 <ExclamationTriangleIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Something went wrong</h3>
                 <p className="text-gray-500 dark:text-gray-400 mb-4">{error}</p>
@@ -98,7 +97,7 @@ const VideoList = ({ apiCall, title, emptyMessage = "No videos found", category 
     // Empty state
     if (videos.length === 0) {
         return (
-            <div className="text-center p-12">
+            <div className="text-center p-6 sm:p-12 mx-4 sm:mx-6">
                 <VideoCameraIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No videos found</h3>
                 <p className="text-gray-500 dark:text-gray-400">{emptyMessage}</p>
@@ -109,9 +108,9 @@ const VideoList = ({ apiCall, title, emptyMessage = "No videos found", category 
     return (
         <div className="fade-in">
             {title && (
-                <h2 className="text-xl font-bold mb-6 px-6 text-gray-900 dark:text-white">{title}</h2>
+                <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-6 px-2 sm:px-6 text-gray-900 dark:text-white">{title}</h2>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 px-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 px-2 sm:px-6">
                 {videos.map((video) => (
                     <div key={video._id} className="slide-up">
                         <VideoCard video={video} />
@@ -121,8 +120,8 @@ const VideoList = ({ apiCall, title, emptyMessage = "No videos found", category 
 
             {/* Load more button */}
             {videos.length > 0 && (
-                <div className="text-center mt-12">
-                    <button className="btn-secondary hover:btn-primary transition-all duration-300">
+                <div className="text-center mt-6 sm:mt-12 px-2 sm:px-6">
+                    <button className="btn-secondary hover:btn-primary transition-all duration-300 w-full sm:w-auto">
                         Load More Videos
                     </button>
                 </div>

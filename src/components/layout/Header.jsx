@@ -31,9 +31,9 @@ const Header = ({ onMenuToggle }) => {
 
     return (
         <header className="fixed top-0 left-0 right-0 header-glass border-b border-gray-200 dark:border-gray-700 z-50">
-            <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3">
                 {/* Left section */}
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 sm:space-x-4">
                     <button
                         onClick={onMenuToggle}
                         className="btn-icon"
@@ -41,15 +41,16 @@ const Header = ({ onMenuToggle }) => {
                     >
                         <Bars3Icon className="h-6 w-6" />
                     </button>
-                    <Link to="/" className="flex items-center space-x-2 group">
-                        <div className="text-youtube-red font-bold text-2xl group-hover:scale-105 transition-transform duration-200">
-                            MadhuTube
+                    <Link to="/" className="flex items-center space-x-1 sm:space-x-2 group">
+                        <div className="text-youtube-red font-bold text-lg sm:text-xl lg:text-2xl group-hover:scale-105 transition-transform duration-200">
+                            <span className="hidden sm:inline">MadhuTube</span>
+                            <span className="sm:hidden">MT</span>
                         </div>
                     </Link>
                 </div>
 
                 {/* Center section - Search */}
-                <div className="flex-1 max-w-2xl mx-4">
+                <div className="flex-1 max-w-2xl mx-1 sm:mx-4">
                     <form onSubmit={handleSearch} className="flex">
                         <div className="flex-1 relative">
                             <input
@@ -57,33 +58,33 @@ const Header = ({ onMenuToggle }) => {
                                 placeholder="Search"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="search-input"
+                                className="w-full px-2 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-l-full focus:outline-none focus:border-blue-500 bg-white dark:bg-youtube-gray text-gray-900 dark:text-white"
                             />
                         </div>
                         <button
                             type="submit"
-                            className="px-6 py-2 bg-gray-100 dark:bg-gray-700 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 group"
+                            className="px-2 sm:px-6 py-2 bg-gray-100 dark:bg-gray-700 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 group min-w-[44px] flex items-center justify-center"
                             aria-label="Search"
                         >
-                            <MagnifyingGlassIcon className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                            <MagnifyingGlassIcon className="h-4 w-4 sm:h-5 sm:w-5 group-hover:scale-110 transition-transform duration-200" />
                         </button>
                     </form>
                 </div>
 
                 {/* Right section */}
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1 sm:space-x-2">
                     <ThemeToggle />
                     {isAuthenticated ? (
                         <>
                             <Link
                                 to="/upload"
-                                className="btn-icon group"
+                                className="btn-icon group hidden sm:flex"
                                 title="Create"
                             >
-                                <VideoCameraIcon className="h-6 w-6 group-hover:scale-110 transition-transform duration-200" />
+                                <VideoCameraIcon className="h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform duration-200" />
                             </Link>
-                            <button className="btn-icon group relative">
-                                <BellIcon className="h-6 w-6 group-hover:scale-110 transition-transform duration-200" />
+                            <button className="btn-icon group relative hidden sm:flex">
+                                <BellIcon className="h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform duration-200" />
                                 {/* Notification badge */}
                                 <span className="absolute top-1 right-1 w-2 h-2 bg-youtube-red rounded-full"></span>
                             </button>
@@ -104,7 +105,7 @@ const Header = ({ onMenuToggle }) => {
                                 </button>
 
                                 {showUserMenu && (
-                                    <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-youtube-gray rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-2 slide-up">
+                                    <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white dark:bg-youtube-gray rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-2 slide-up">
                                         <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                                             <p className="font-medium text-gray-900 dark:text-white">{user?.fullName}</p>
                                             <p className="text-sm text-gray-500 dark:text-gray-400">@{user?.username}</p>
@@ -145,10 +146,10 @@ const Header = ({ onMenuToggle }) => {
                     ) : (
                         <Link
                             to="/login"
-                            className="btn-primary flex items-center space-x-2 hover:scale-105 transition-transform duration-200"
+                            className="bg-youtube-red hover:bg-youtube-hover text-white px-2 sm:px-4 py-2 rounded-md transition-all duration-200 font-medium shadow-sm hover:shadow-md active:scale-95 text-xs sm:text-base flex items-center space-x-1 sm:space-x-2 hover:scale-105 min-w-[60px] sm:min-w-auto justify-center"
                         >
-                            <UserCircleIcon className="h-5 w-5" />
-                            <span>Sign in</span>
+                            <UserCircleIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                            <span className="hidden sm:inline">Sign in</span>
                         </Link>
                     )}
                 </div>

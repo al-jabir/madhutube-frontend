@@ -16,11 +16,11 @@
 
   /* Button Components */
   .btn-primary {
-    @apply bg-youtube-red hover:bg-youtube-hover text-white px-4 py-2 rounded-md transition-all duration-200 font-medium shadow-sm hover:shadow-md active:scale-95;
+    @apply bg-youtube-red hover:bg-youtube-hover text-white px-3 py-2 sm:px-4 sm:py-2 rounded-md transition-all duration-200 font-medium shadow-sm hover:shadow-md active:scale-95 text-sm sm:text-base;
   }
 
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 dark:bg-youtube-gray dark:hover:bg-gray-600 text-gray-900 dark:text-white px-4 py-2 rounded-md transition-all duration-200 font-medium;
+    @apply bg-gray-200 hover:bg-gray-300 dark:bg-youtube-gray dark:hover:bg-gray-600 text-gray-900 dark:text-white px-3 py-2 sm:px-4 sm:py-2 rounded-md transition-all duration-200 font-medium text-sm sm:text-base;
   }
 
   .btn-icon {
@@ -46,7 +46,7 @@
   }
 
   .video-title {
-    @apply text-base font-medium text-gray-900 dark:text-white line-clamp-2 hover:text-youtube-red transition-colors duration-200;
+    @apply text-sm sm:text-base font-medium text-gray-900 dark:text-white line-clamp-2 hover:text-youtube-red transition-colors duration-200;
   }
 
   .video-meta {
@@ -54,7 +54,7 @@
   }
 
   .channel-avatar {
-    @apply w-9 h-9 rounded-full object-cover bg-gray-200 dark:bg-gray-700;
+    @apply w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover bg-gray-200 dark:bg-gray-700;
   }
 
   /* Layout Components */
@@ -116,5 +116,38 @@
   /* Loading animations */
   .skeleton {
     @apply animate-pulse bg-gray-200 dark:bg-gray-700;
+  }
+
+  /* Mobile touch targets */
+  @media (max-width: 640px) {
+    .btn-icon {
+      @apply min-w-[44px] min-h-[44px] flex items-center justify-center;
+    }
+
+    /* Improved mobile spacing */
+    .mobile-friendly {
+      @apply px-2 py-3;
+    }
+
+    /* Mobile typography improvements */
+    .mobile-text {
+      @apply text-sm leading-relaxed;
+    }
+
+    /* Mobile-specific header height */
+    .mobile-header {
+      @apply h-14;
+    }
+  }
+
+  /* Enhanced mobile interactions */
+  @media (hover: none) and (pointer: coarse) {
+    .hover\:scale-105:hover {
+      transform: none;
+    }
+
+    .hover\:scale-105:active {
+      transform: scale(0.95);
+    }
   }
 }

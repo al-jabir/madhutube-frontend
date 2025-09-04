@@ -10,6 +10,8 @@ import ProtectedRoute from './components/ui/ProtectedRoute.jsx';
 import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
 import VideoDetail from './pages/VideoDetail.jsx';
 import Channel from './pages/Channel.jsx';
 import Profile from './pages/Profile.jsx';
@@ -48,6 +50,16 @@ function App() {
                   <Route path="/register" element={
                     <ProtectedRoute requireAuth={false}>
                       <Register />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/forgot-password" element={
+                    <ProtectedRoute requireAuth={false}>
+                      <ForgotPassword />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/reset-password" element={
+                    <ProtectedRoute requireAuth={false}>
+                      <ResetPassword />
                     </ProtectedRoute>
                   } />
 

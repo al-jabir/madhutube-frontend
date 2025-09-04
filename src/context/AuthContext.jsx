@@ -44,9 +44,9 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      console.log('Attempting login with:', credentials);
+
       const response = await authAPI.login(credentials);
-      console.log('Login response:', response.data);
+
 
       const { user: userData, accessToken, refreshToken } = response.data.data;
 
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true, user: userData };
     } catch (error) {
-      console.error('Login error:', error);
+
       const message = error.response?.data?.message || 'Login failed';
       setError(message);
       return { success: false, message };
@@ -74,9 +74,9 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      console.log('Attempting registration with:', userData);
+
       const response = await authAPI.register(userData);
-      console.log('Registration response:', response.data);
+
 
       const { user: newUser, accessToken, refreshToken } = response.data.data;
 
