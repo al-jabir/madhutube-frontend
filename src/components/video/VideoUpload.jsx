@@ -45,6 +45,21 @@ const VideoUpload = () => {
             return;
         }
 
+        // Validate required fields
+        if (!formData.title.trim()) {
+            setError('Please enter a title for your video');
+            return;
+        }
+
+        // Additional validation
+        if (formData.title.trim().length < 3) {
+            setError('Video title must be at least 3 characters long');
+            return;
+        }
+
+        // Declare progressInterval outside try block so it's accessible in catch block
+        let progressInterval;
+
         try {
             setIsLoading(true);
             setError(null);
@@ -52,7 +67,7 @@ const VideoUpload = () => {
             setUploadStage('uploading');
 
             // Simulate upload progress
-            const progressInterval = setInterval(() => {
+            progressInterval = setInterval(() => {
                 setUploadProgress(prev => {
                     if (prev >= 90) {
                         clearInterval(progressInterval);
@@ -91,7 +106,9 @@ const VideoUpload = () => {
                 }
             }, 1000);
         } catch (error) {
-            clearInterval(progressInterval);
+            if (progressInterval) {
+                clearInterval(progressInterval);
+            }
             console.error('Upload error details:', {
                 error,
                 response: error.response,
@@ -100,13 +117,25 @@ const VideoUpload = () => {
                 data: error.response?.data
             });
 
+            // Log the full error response for debugging
+            console.log('Full error response:', JSON.stringify(error.response, null, 2));
+
             let errorMessage = 'Failed to upload video';
             if (error.response?.data?.message) {
                 errorMessage = error.response.data.message;
             } else if (error.response?.data?.error) {
                 errorMessage = error.response.data.error;
+            } else if (error.response?.data?.errors) {
+                // Handle validation errors
+                const errorMessages = Object.values(error.response.data.errors).flat();
+                errorMessage = errorMessages.join(', ') || 'Validation failed';
             } else if (error.message) {
                 errorMessage = `Network error: ${error.message}`;
+            }
+
+            // Add more specific error information
+            if (error.response?.status === 400) {
+                errorMessage += ' - Please check that all required fields are filled correctly.';
             }
 
             setError(errorMessage);

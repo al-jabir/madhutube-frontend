@@ -15,6 +15,9 @@ export const videoAPI = {
   createVideo: async (videoData) => {
     const formData = new FormData();
 
+    // Log the input data
+    console.log('Input videoData:', videoData);
+
     // Append each field to FormData
     Object.keys(videoData).forEach(key => {
       if (videoData[key] !== null && videoData[key] !== undefined) {
@@ -27,11 +30,29 @@ export const videoAPI = {
       console.log(key, value);
     }
 
-    return api.post('/videos', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    // Log the FormData as an object for better visibility
+    const formDataObj = {};
+    for (let [key, value] of formData.entries()) {
+      formDataObj[key] = value instanceof File ?
+        `${value.name} (${value.type}, ${value.size} bytes)` :
+        value;
+    }
+    console.log('FormData as object:', formDataObj);
+
+    // Also log the keys to see what fields we're sending
+    console.log('FormData keys:', Object.keys(formDataObj));
+
+    // Try to detect if we're missing common required fields
+    const requiredFields = ['title', 'videoFile', 'thumbnail'];
+    const missingFields = requiredFields.filter(field => !formDataObj[field]);
+
+    if (missingFields.length > 0) {
+      console.warn('Potentially missing required fields:', missingFields);
+    }
+
+    // When sending FormData, let the browser set the Content-Type header automatically
+    // by not specifying it explicitly, which allows for proper boundary generation
+    return api.post('/videos', formData);
   },
 
   // Update video
