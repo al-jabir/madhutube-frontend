@@ -15,6 +15,7 @@ const VideoUpload = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
+        duration: '', // Add duration field
         videoFile: null,
         thumbnail: null,
     });
@@ -51,9 +52,21 @@ const VideoUpload = () => {
             return;
         }
 
-        // Additional validation
+        // Additional validation for title
         if (formData.title.trim().length < 3) {
             setError('Video title must be at least 3 characters long');
+            return;
+        }
+
+        // Validate description is required
+        if (!formData.description.trim()) {
+            setError('Please enter a description for your video');
+            return;
+        }
+
+        // Validate duration is required and is a positive number
+        if (!formData.duration || isNaN(formData.duration) || Number(formData.duration) <= 0) {
+            setError('Please enter a valid duration for your video');
             return;
         }
 
@@ -306,9 +319,9 @@ const VideoUpload = () => {
                         )}
                     </div>
                 </div>
-                {/* Title and Description */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div>
+                {/* Title, Description, and Duration */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2">
                         <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Title *
                         </label>
@@ -329,13 +342,31 @@ const VideoUpload = () => {
                     </div>
 
                     <div>
+                        <label htmlFor="duration" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Duration (seconds) *
+                        </label>
+                        <input
+                            type="number"
+                            id="duration"
+                            name="duration"
+                            required
+                            min="1"
+                            className="input-field"
+                            placeholder="Enter duration in seconds"
+                            value={formData.duration}
+                            onChange={handleChange}
+                        />
+                    </div>
+
+                    <div className="lg:col-span-3">
                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Description
+                            Description *
                         </label>
                         <textarea
                             id="description"
                             name="description"
                             rows={4}
+                            required
                             className="input-field"
                             placeholder="Tell viewers about your video"
                             value={formData.description}

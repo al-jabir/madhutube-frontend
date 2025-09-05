@@ -159,8 +159,8 @@ client/
 3. **Environment Setup**
    Create a `.env` file in the client directory:
    ```env
-   VITE_API_BASE_URL=http://localhost:5000/api/v1
-   VITE_REFRESH_TOKEN_URL=http://localhost:5000/api/v1/users/refresh-token
+   VITE_API_BASE_URL=https://madhutube-backend.onrender.com/api/v1
+   VITE_REFRESH_TOKEN_URL=https://madhutube-backend.onrender.com/api/v1/users/refresh-token
    ```
 
 4. **Start the development server**
@@ -181,8 +181,8 @@ client/
 
 ### API Configuration
 The client is configured to communicate with the backend server on port 5000:
-- API Base URL: `http://localhost:5000/api/v1`
-- Refresh Token URL: `http://localhost:5000/api/v1/users/refresh-token`
+- API Base URL: `https://madhutube-backend.onrender.com/api/v1`
+- Refresh Token URL: `https://madhutube-backend.onrender.com/api/v1/users/refresh-token`
 
 ### Tailwind CSS
 The project uses Tailwind CSS with a custom configuration that includes:
