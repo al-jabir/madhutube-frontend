@@ -7,6 +7,7 @@ import SubscriptionButton from '../components/subscription/SubscriptionButton.js
 import LoadingSpinner from '../components/ui/LoadingSpinner.jsx';
 import VideoList from '../components/video/VideoList.jsx';
 import LiveComments from '../components/realtime/LiveComments.jsx';
+import VideoPlayer from '../components/video/VideoPlayer.jsx';
 import {
     HandThumbUpIcon,
     HandThumbDownIcon,
@@ -41,37 +42,42 @@ const VideoDetail = () => {
     const loadVideo = async () => {
         try {
             setLoading(true);
-            // In a real app, this would be an API call
-            // const response = await videoAPI.getVideoById(id);
+            const response = await videoAPI.getVideo(id);
 
-            // Mock video data
-            setTimeout(() => {
-                setVideo({
-                    _id: id,
-                    title: 'Sample Video Title - Technology Tutorial',
-                    description: 'This is a comprehensive tutorial about modern web development technologies. In this video, we will cover React, Node.js, and MongoDB to build a full-stack application. You will learn about component architecture, state management, API integration, and much more.',
-                    videoFile: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-                    thumbnail: 'https://via.placeholder.com/1280x720?text=Video+Thumbnail',
-                    views: 12543,
-                    likes: 1205,
-                    dislikes: 23,
-                    duration: '15:30',
-                    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+            // Handle different response structures
+            const videoData = response.data?.data || response.data;
+
+            if (videoData) {
+                // Ensure all required fields have default values to prevent undefined errors
+                const processedVideo = {
+                    _id: videoData._id || videoData.id || 'unknown',
+                    title: videoData.title || 'Untitled Video',
+                    description: videoData.description || '',
+                    videoFile: videoData.videoFile || videoData.video || '',
+                    thumbnail: videoData.thumbnail || videoData.thumbnailUrl || '',
+                    views: videoData.views || 0,
+                    likes: videoData.likes || 0,
+                    dislikes: videoData.dislikes || 0,
+                    createdAt: videoData.createdAt || new Date().toISOString(),
                     owner: {
-                        _id: 'owner123',
-                        username: 'techcreator',
-                        fullName: 'Tech Creator',
-                        avatar: 'https://via.placeholder.com/40x40?text=TC',
-                        subscribersCount: 15000
+                        _id: videoData.owner?._id || videoData.owner?.id || 'unknown',
+                        username: videoData.owner?.username || 'unknown',
+                        fullName: videoData.owner?.fullName || videoData.owner?.name || 'Unknown User',
+                        avatar: videoData.owner?.avatar || '',
+                        subscribersCount: videoData.owner?.subscribersCount || videoData.owner?.subscribers || 0
                     },
-                    tags: ['react', 'javascript', 'tutorial', 'web development']
-                });
-                setLikeCount(1205);
-                setLoading(false);
-            }, 1000);
+                    tags: videoData.tags || []
+                };
+
+                setVideo(processedVideo);
+                setLikeCount(processedVideo.likes);
+            } else {
+                error('Video not found');
+            }
         } catch (err) {
             console.error('Error loading video:', err);
             error('Failed to load video');
+        } finally {
             setLoading(false);
         }
     };
@@ -134,12 +140,18 @@ const VideoDetail = () => {
     };
 
     const formatNumber = (num) => {
-        if (num >= 1000000) {
-            return (num / 1000000).toFixed(1) + 'M';
-        } else if (num >= 1000) {
-            return (num / 1000).toFixed(1) + 'K';
+        // Handle undefined, null, or invalid numbers
+        if (num === undefined || num === null || isNaN(num)) {
+            return '0';
         }
-        return num.toString();
+
+        const numValue = Number(num);
+        if (numValue >= 1000000) {
+            return (numValue / 1000000).toFixed(1) + 'M';
+        } else if (numValue >= 1000) {
+            return (numValue / 1000).toFixed(1) + 'K';
+        }
+        return numValue.toString();
     };
 
     if (loading) {
@@ -168,33 +180,29 @@ const VideoDetail = () => {
                     {/* Main Content */}
                     <div className="lg:col-span-2">
                         {/* Video Player */}
-                        <div className="bg-black rounded-lg overflow-hidden mb-6 aspect-video">
-                            <video
-                                src={video.videoFile}
-                                poster={video.thumbnail}
-                                controls
-                                className="w-full h-full"
-                                onLoadStart={() => console.log('Video loading started')}
-                            >
-                                Your browser does not support the video tag.
-                            </video>
+                        <div className="bg-black rounded-lg overflow-hidden mb-6">
+                            <VideoPlayer
+                                src={video?.videoFile || ''}
+                                poster={video?.thumbnail || ''}
+                                title={video?.title || 'Video'}
+                            />
                         </div>
 
                         {/* Video Info */}
-                        <div className="bg-white dark:bg-youtube-gray rounded-lg p-6 mb-6">
+                        <div className="bg-white dark:bg-youtube-gray rounded-lg p-3 mb-6">
                             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                                {video.title}
+                                {video?.title || 'Video Title'}
                             </h1>
 
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
                                     <div className="flex items-center space-x-1">
                                         <EyeIcon className="h-4 w-4" />
-                                        <span>{formatNumber(video.views)} views</span>
+                                        <span>{formatNumber(video?.views || 0)} views</span>
                                     </div>
                                     <div className="flex items-center space-x-1">
                                         <CalendarIcon className="h-4 w-4" />
-                                        <span>{formatDate(video.createdAt)}</span>
+                                        <span>{formatDate(video?.createdAt || new Date())}</span>
                                     </div>
                                 </div>
 
@@ -202,8 +210,8 @@ const VideoDetail = () => {
                                     <button
                                         onClick={handleLike}
                                         className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-colors duration-200 ${isLiked
-                                                ? 'bg-youtube-red text-white'
-                                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                            ? 'bg-youtube-red text-white'
+                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                                             }`}
                                     >
                                         {isLiked ? (
@@ -211,14 +219,14 @@ const VideoDetail = () => {
                                         ) : (
                                             <HandThumbUpIcon className="h-5 w-5" />
                                         )}
-                                        <span>{formatNumber(likeCount)}</span>
+                                        <span>{formatNumber(likeCount || 0)}</span>
                                     </button>
 
                                     <button
                                         onClick={handleDislike}
                                         className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-colors duration-200 ${isDisliked
-                                                ? 'bg-gray-800 text-white'
-                                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                            ? 'bg-gray-800 text-white'
+                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                                             }`}
                                     >
                                         {isDisliked ? (
@@ -241,13 +249,13 @@ const VideoDetail = () => {
                             {/* Channel Info */}
                             <div className="flex items-center justify-between mb-6">
                                 <Link
-                                    to={`/channel/${video.owner.username}`}
+                                    to={`/channel/${video?.owner?.username || 'unknown'}`}
                                     className="flex items-center space-x-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-2 transition-colors duration-200"
                                 >
-                                    {video.owner.avatar ? (
+                                    {video?.owner?.avatar ? (
                                         <img
                                             src={video.owner.avatar}
-                                            alt={video.owner.fullName}
+                                            alt={video?.owner?.fullName || 'User'}
                                             className="w-12 h-12 rounded-full"
                                         />
                                     ) : (
@@ -255,16 +263,16 @@ const VideoDetail = () => {
                                     )}
                                     <div>
                                         <h3 className="font-semibold text-gray-900 dark:text-white">
-                                            {video.owner.fullName}
+                                            {video?.owner?.fullName || 'Unknown User'}
                                         </h3>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                                            {formatNumber(video.owner.subscribersCount)} subscribers
+                                            {formatNumber(video?.owner?.subscribersCount || 0)} subscribers
                                         </p>
                                     </div>
                                 </Link>
 
                                 <SubscriptionButton
-                                    channel={video.owner}
+                                    channel={video?.owner}
                                     onSubscriptionChange={(channelId, isSubscribed) => {
                                         success(isSubscribed ? 'Subscribed!' : 'Unsubscribed!');
                                     }}
@@ -276,9 +284,9 @@ const VideoDetail = () => {
                                 <div className="relative">
                                     <p className={`text-gray-700 dark:text-gray-300 whitespace-pre-wrap ${showDescription ? '' : 'line-clamp-3'
                                         }`}>
-                                        {video.description}
+                                        {video?.description || 'No description available.'}
                                     </p>
-                                    {video.description.length > 200 && (
+                                    {video?.description && video.description.length > 200 && (
                                         <button
                                             onClick={() => setShowDescription(!showDescription)}
                                             className="text-youtube-red hover:text-youtube-hover font-medium text-sm mt-2"
@@ -288,7 +296,7 @@ const VideoDetail = () => {
                                     )}
                                 </div>
 
-                                {video.tags && video.tags.length > 0 && (
+                                {video?.tags && video.tags.length > 0 && (
                                     <div className="flex flex-wrap gap-2 mt-4">
                                         {video.tags.map((tag, index) => (
                                             <span
@@ -323,6 +331,7 @@ const VideoDetail = () => {
                             <VideoList
                                 title={null}
                                 emptyMessage="No related videos found"
+                                layout="single-column"
                                 // Mock empty for now - in real app this would show related videos
                                 apiCall={null}
                             />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import VideoList from '../components/video/VideoList.jsx';
 import {
     FireIcon,
@@ -12,6 +12,21 @@ import {
 
 const Home = () => {
     const [selectedCategory, setSelectedCategory] = useState('all');
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    // Listen for video uploads to refresh the list
+    useEffect(() => {
+        const handleVideoUploaded = () => {
+            setRefreshKey(prev => prev + 1);
+        };
+
+        // Listen for custom event when video is uploaded
+        window.addEventListener('videoUploaded', handleVideoUploaded);
+
+        return () => {
+            window.removeEventListener('videoUploaded', handleVideoUploaded);
+        };
+    }, []);
 
     const categories = [
         { id: 'all', name: 'All', icon: null },
@@ -27,7 +42,7 @@ const Home = () => {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-youtube-dark">
             {/* Category Filter Bar */}
-            <div className="sticky top-14 sm:top-16 z-10 bg-white dark:bg-youtube-dark border-b border-gray-200 dark:border-gray-700 py-2 sm:py-3">
+            <div className="sticky top-14 sm:top-16 z-30 bg-white dark:bg-youtube-dark border-b border-gray-200 dark:border-gray-700 py-2 sm:py-3">
                 <div className="flex space-x-2 sm:space-x-3 px-2 sm:px-6 overflow-x-auto scrollbar-hide">
                     {categories.map((category) => {
                         const IconComponent = category.icon;
@@ -54,12 +69,14 @@ const Home = () => {
             <div className="px-2 sm:px-6 py-3 sm:py-6">
                 {/* Hero Section */}
                 <div className="mb-4 sm:mb-8">
-                    <div className="bg-gradient-to-r from-youtube-red to-red-600 rounded-lg sm:rounded-2xl p-4 sm:p-8 text-white relative overflow-hidden">
-                        <div className="relative z-10">
-                            <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold mb-2">Welcome to MadhuTube</h1>
-                            <p className="text-sm sm:text-lg lg:text-xl opacity-90 mb-3 sm:mb-6">Discover amazing videos from creators around the world</p>
-                            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                                <button className="bg-white text-youtube-red px-4 py-2 sm:px-6 sm:py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors duration-200 text-sm sm:text-base w-full sm:w-auto min-h-[44px] flex items-center justify-center">
+                    <div className="bg-gradient-to-r from-youtube-red to-red-600 rounded-lg sm:rounded-2xl p-4 sm:p-8 text-white relative overflow-hidden shadow-xl">
+                        {/* Overlay for better text contrast */}
+                        <div className="absolute inset-0 bg-black/10 z-10"></div>
+                        <div className="relative z-20">
+                            <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold mb-2 text-white drop-shadow-lg relative z-30">Welcome to MadhuTube</h1>
+                            <p className="text-sm sm:text-lg lg:text-xl opacity-90 mb-3 sm:mb-6 text-white drop-shadow-md relative z-30">Discover amazing videos from creators around the world</p>
+                            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 relative z-30">
+                                <button className="bg-white text-youtube-red px-4 py-2 sm:px-6 sm:py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors duration-200 text-sm sm:text-base w-full sm:w-auto min-h-[44px] flex items-center justify-center shadow-lg">
                                     Explore Now
                                 </button>
                                 <button className="border-2 border-white text-white px-4 py-2 sm:px-6 sm:py-3 rounded-full font-semibold hover:bg-white hover:text-youtube-red transition-all duration-200 text-sm sm:text-base w-full sm:w-auto min-h-[44px] flex items-center justify-center">
@@ -68,8 +85,8 @@ const Home = () => {
                             </div>
                         </div>
                         {/* Background decoration */}
-                        <div className="absolute top-0 right-0 w-20 h-20 sm:w-64 sm:h-64 bg-white opacity-10 rounded-full transform translate-x-5 sm:translate-x-20 -translate-y-5 sm:-translate-y-20"></div>
-                        <div className="absolute bottom-0 right-5 sm:right-20 w-10 h-10 sm:w-32 sm:h-32 bg-white opacity-10 rounded-full"></div>
+                        <div className="absolute top-0 right-0 w-20 h-20 sm:w-64 sm:h-64 bg-white opacity-10 rounded-full transform translate-x-5 sm:translate-x-20 -translate-y-5 sm:-translate-y-20 z-0"></div>
+                        <div className="absolute bottom-0 right-5 sm:right-20 w-10 h-10 sm:w-32 sm:h-32 bg-white opacity-10 rounded-full z-0"></div>
                     </div>
                 </div>
 
@@ -84,7 +101,7 @@ const Home = () => {
                         </button>
                     </div>
 
-                    <VideoList category={selectedCategory} />
+                    <VideoList category={selectedCategory} refreshKey={refreshKey} />
                 </div>
 
                 {/* Featured Creators Section */}

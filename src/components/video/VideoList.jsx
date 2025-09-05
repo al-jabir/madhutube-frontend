@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import VideoCard from './VideoCard.jsx';
 import { ExclamationTriangleIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
-import { getRandomVideos } from '../../services/localVideoService.js';
+import { videoAPI } from '../../services/videoService.js';
 
-const VideoList = ({ apiCall, title, emptyMessage = "No videos found", category }) => {
+const VideoList = ({ apiCall, title, emptyMessage = "No videos found", category, refreshKey, layout = "grid" }) => {
     const [videos, setVideos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -14,31 +14,22 @@ const VideoList = ({ apiCall, title, emptyMessage = "No videos found", category 
                 setLoading(true);
                 setError(null);
 
-                // Use local video data for demonstration
-                if (!apiCall) {
-                    // Get local videos with images
-                    const localVideos = getRandomVideos(12);
+                // Use provided API call or default to fetching all videos
+                const response = apiCall ? await apiCall() : await videoAPI.getAllVideos();
 
-                    // Simulate network delay
-                    setTimeout(() => {
-                        setVideos(localVideos);
-                        setLoading(false);
-                    }, 1000);
-                    return;
-                }
-
-                const response = await apiCall();
-                setVideos(response.data.data || response.data);
+                // Handle different response structures
+                const videosData = response.data?.data || response.data || [];
+                setVideos(Array.isArray(videosData) ? videosData : []);
             } catch (error) {
                 console.error('Error fetching videos:', error);
                 setError(error.response?.data?.message || 'Failed to load videos');
             } finally {
-                if (apiCall) setLoading(false);
+                setLoading(false);
             }
         };
 
         fetchVideos();
-    }, [apiCall, category]);
+    }, [apiCall, category, refreshKey]);
 
     // Loading skeleton
     if (loading) {
@@ -47,7 +38,10 @@ const VideoList = ({ apiCall, title, emptyMessage = "No videos found", category 
                 {title && (
                     <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 px-2 sm:px-6">{title}</h2>
                 )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 px-2 sm:px-6">
+                <div className={`${layout === "single-column"
+                        ? "grid grid-cols-1 gap-3 px-2 sm:px-6"
+                        : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 px-2 sm:px-6"
+                    }`}>
                     {Array.from({ length: 12 }).map((_, index) => (
                         <div key={index} className="animate-pulse">
                             <div className="bg-gray-200 dark:bg-gray-700 aspect-video rounded-xl mb-3"></div>
@@ -99,7 +93,10 @@ const VideoList = ({ apiCall, title, emptyMessage = "No videos found", category 
             {title && (
                 <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-6 px-2 sm:px-6 text-gray-900 dark:text-white">{title}</h2>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 px-2 sm:px-6">
+            <div className={`${layout === "single-column"
+                    ? "grid grid-cols-1 gap-3 px-2 sm:px-6"
+                    : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 px-2 sm:px-6"
+                }`}>
                 {videos.map((video) => (
                     <div key={video._id} className="slide-up">
                         <VideoCard video={video} />

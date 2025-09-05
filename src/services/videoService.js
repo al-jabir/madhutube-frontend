@@ -14,11 +14,19 @@ export const videoAPI = {
   // Create new video
   createVideo: async (videoData) => {
     const formData = new FormData();
+
+    // Append each field to FormData
     Object.keys(videoData).forEach(key => {
-      if (videoData[key]) {
+      if (videoData[key] !== null && videoData[key] !== undefined) {
         formData.append(key, videoData[key]);
       }
     });
+
+    console.log('FormData contents:');
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+
     return api.post('/videos', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
