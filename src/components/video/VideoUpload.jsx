@@ -15,7 +15,7 @@ const VideoUpload = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        // Removed duration field
+        duration: '', // Add duration field back
         videoFile: null,
         thumbnail: null,
     });
@@ -29,9 +29,29 @@ const VideoUpload = () => {
 
     const videoInputRef = useRef(null);
     const thumbnailInputRef = useRef(null);
+    const videoDurationRef = useRef(0); // Ref to store video duration
 
     const { user } = useAuth();
     const navigate = useNavigate();
+
+    // Function to extract duration from video file
+    const getVideoDuration = (file) => {
+        return new Promise((resolve) => {
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+
+            video.onloadedmetadata = function () {
+                window.URL.revokeObjectURL(video.src);
+                resolve(video.duration);
+            };
+
+            video.onerror = function () {
+                resolve(0); // Default to 0 if there's an error
+            };
+
+            video.src = URL.createObjectURL(file);
+        });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -64,7 +84,11 @@ const VideoUpload = () => {
             return;
         }
 
-        // Removed duration validation
+        // Validate duration
+        if (!formData.duration || formData.duration <= 0) {
+            setError('Video duration is invalid');
+            return;
+        }
 
         try {
             setIsLoading(true);
@@ -147,7 +171,7 @@ const VideoUpload = () => {
         }
     };
 
-    const handleChange = (e) => {
+    const handleChange = async (e) => {
         if (e.target.type === 'file') {
             const file = e.target.files[0];
             if (file) {
@@ -159,6 +183,22 @@ const VideoUpload = () => {
                 if (e.target.name === 'videoFile') {
                     const url = URL.createObjectURL(file);
                     setPreviewUrl(url);
+
+                    // Extract duration from video file
+                    try {
+                        const duration = await getVideoDuration(file);
+                        videoDurationRef.current = duration;
+                        setFormData(prev => ({
+                            ...prev,
+                            duration: duration // Store duration in form data
+                        }));
+                    } catch (err) {
+                        console.error('Error getting video duration:', err);
+                        setFormData(prev => ({
+                            ...prev,
+                            duration: 0
+                        }));
+                    }
                 } else if (e.target.name === 'thumbnail') {
                     const url = URL.createObjectURL(file);
                     setThumbnailPreview(url);
@@ -182,7 +222,7 @@ const VideoUpload = () => {
         }
     };
 
-    const handleDrop = (e) => {
+    const handleDrop = async (e) => {
         e.preventDefault();
         e.stopPropagation();
         setDragActive(false);
@@ -196,6 +236,22 @@ const VideoUpload = () => {
                 });
                 const url = URL.createObjectURL(file);
                 setPreviewUrl(url);
+
+                // Extract duration from video file
+                try {
+                    const duration = await getVideoDuration(file);
+                    videoDurationRef.current = duration;
+                    setFormData(prev => ({
+                        ...prev,
+                        duration: duration // Store duration in form data
+                    }));
+                } catch (err) {
+                    console.error('Error getting video duration:', err);
+                    setFormData(prev => ({
+                        ...prev,
+                        duration: 0
+                    }));
+                }
             }
         }
     };
@@ -208,7 +264,13 @@ const VideoUpload = () => {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
-    // Removed formatDuration function
+    // Format duration for display (seconds to MM:SS)
+    const formatDuration = (duration) => {
+        if (!duration || duration <= 0) return '0:00';
+        const minutes = Math.floor(duration / 60);
+        const seconds = Math.floor(duration % 60);
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    };
 
     return (
         <div className="max-w-4xl mx-auto p-6">
@@ -274,11 +336,16 @@ const VideoUpload = () => {
                                         <p className="text-sm text-green-600 dark:text-green-400">
                                             {formatFileSize(formData.videoFile.size)}
                                         </p>
+                                        {formData.duration > 0 && (
+                                            <p className="text-sm text-green-600 dark:text-green-400">
+                                                Duration: {formatDuration(formData.duration)}
+                                            </p>
+                                        )}
                                     </div>
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            setFormData({ ...formData, videoFile: null });
+                                            setFormData({ ...formData, videoFile: null, duration: '' });
                                             setPreviewUrl(null);
                                         }}
                                         className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
@@ -441,7 +508,7 @@ const VideoUpload = () => {
 
                     <button
                         type="submit"
-                        disabled={isLoading || !formData.videoFile || !formData.thumbnail}
+                        disabled={isLoading || !formData.videoFile || !formData.thumbnail || !formData.duration}
                         className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                     >
                         <VideoCameraIcon className="h-5 w-5" />
