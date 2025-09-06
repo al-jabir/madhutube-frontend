@@ -15,7 +15,7 @@ const VideoUpload = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        duration: '', // Add duration field back
+        duration: 0, // Store as number instead of string
         videoFile: null,
         thumbnail: null,
     });
@@ -29,24 +29,24 @@ const VideoUpload = () => {
 
     const videoInputRef = useRef(null);
     const thumbnailInputRef = useRef(null);
-    const videoDurationRef = useRef(0); // Ref to store video duration
 
     const { user } = useAuth();
     const navigate = useNavigate();
 
     // Function to extract duration from video file
     const getVideoDuration = (file) => {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             const video = document.createElement('video');
             video.preload = 'metadata';
 
             video.onloadedmetadata = function () {
                 window.URL.revokeObjectURL(video.src);
-                resolve(video.duration);
+                resolve(video.duration || 0);
             };
 
-            video.onerror = function () {
-                resolve(0); // Default to 0 if there's an error
+            video.onerror = function (err) {
+                console.error('Error loading video metadata:', err);
+                reject(new Error('Failed to load video metadata'));
             };
 
             video.src = URL.createObjectURL(file);
@@ -85,8 +85,8 @@ const VideoUpload = () => {
         }
 
         // Validate duration
-        if (!formData.duration || formData.duration <= 0) {
-            setError('Video duration is invalid');
+        if (formData.duration <= 0) {
+            setError('Unable to determine video duration. Please try another video file.');
             return;
         }
 
@@ -175,11 +175,6 @@ const VideoUpload = () => {
         if (e.target.type === 'file') {
             const file = e.target.files[0];
             if (file) {
-                setFormData({
-                    ...formData,
-                    [e.target.name]: file,
-                });
-
                 if (e.target.name === 'videoFile') {
                     const url = URL.createObjectURL(file);
                     setPreviewUrl(url);
@@ -187,28 +182,34 @@ const VideoUpload = () => {
                     // Extract duration from video file
                     try {
                         const duration = await getVideoDuration(file);
-                        videoDurationRef.current = duration;
                         setFormData(prev => ({
                             ...prev,
-                            duration: duration // Store duration in form data
+                            videoFile: file,
+                            duration: duration // Store duration as number
                         }));
                     } catch (err) {
                         console.error('Error getting video duration:', err);
+                        setError('Failed to process video file. Please try another file.');
                         setFormData(prev => ({
                             ...prev,
+                            videoFile: file,
                             duration: 0
                         }));
                     }
                 } else if (e.target.name === 'thumbnail') {
                     const url = URL.createObjectURL(file);
                     setThumbnailPreview(url);
+                    setFormData(prev => ({
+                        ...prev,
+                        thumbnail: file
+                    }));
                 }
             }
         } else {
-            setFormData({
-                ...formData,
+            setFormData(prev => ({
+                ...prev,
                 [e.target.name]: e.target.value,
-            });
+            }));
         }
     };
 
@@ -230,25 +231,23 @@ const VideoUpload = () => {
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
             const file = e.dataTransfer.files[0];
             if (file.type.startsWith('video/')) {
-                setFormData({
-                    ...formData,
-                    videoFile: file,
-                });
                 const url = URL.createObjectURL(file);
                 setPreviewUrl(url);
 
                 // Extract duration from video file
                 try {
                     const duration = await getVideoDuration(file);
-                    videoDurationRef.current = duration;
                     setFormData(prev => ({
                         ...prev,
-                        duration: duration // Store duration in form data
+                        videoFile: file,
+                        duration: duration // Store duration as number
                     }));
                 } catch (err) {
                     console.error('Error getting video duration:', err);
+                    setError('Failed to process video file. Please try another file.');
                     setFormData(prev => ({
                         ...prev,
+                        videoFile: file,
                         duration: 0
                     }));
                 }
@@ -345,7 +344,7 @@ const VideoUpload = () => {
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            setFormData({ ...formData, videoFile: null, duration: '' });
+                                            setFormData({ ...formData, videoFile: null, duration: 0 });
                                             setPreviewUrl(null);
                                         }}
                                         className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
@@ -447,7 +446,7 @@ const VideoUpload = () => {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setFormData({ ...formData, thumbnail: null });
+                                        setFormData(prev => ({ ...prev, thumbnail: null }));
                                         setThumbnailPreview(null);
                                     }}
                                     className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
@@ -508,7 +507,7 @@ const VideoUpload = () => {
 
                     <button
                         type="submit"
-                        disabled={isLoading || !formData.videoFile || !formData.thumbnail || !formData.duration}
+                        disabled={isLoading || !formData.videoFile || !formData.thumbnail || formData.duration <= 0}
                         className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                     >
                         <VideoCameraIcon className="h-5 w-5" />
