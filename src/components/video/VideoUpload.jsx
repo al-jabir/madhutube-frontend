@@ -15,7 +15,7 @@ const VideoUpload = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        duration: '', // Add duration field
+        // Removed duration field
         videoFile: null,
         thumbnail: null,
     });
@@ -64,14 +64,7 @@ const VideoUpload = () => {
             return;
         }
 
-        // Validate duration is required and is a positive number
-        if (!formData.duration || isNaN(formData.duration) || Number(formData.duration) <= 0) {
-            setError('Please enter a valid duration for your video');
-            return;
-        }
-
-        // Declare progressInterval outside try block so it's accessible in catch block
-        let progressInterval;
+        // Removed duration validation
 
         try {
             setIsLoading(true);
@@ -79,23 +72,21 @@ const VideoUpload = () => {
             setUploadProgress(0);
             setUploadStage('uploading');
 
-            // Simulate upload progress
-            progressInterval = setInterval(() => {
-                setUploadProgress(prev => {
-                    if (prev >= 90) {
-                        clearInterval(progressInterval);
+            const response = await videoAPI.createVideo(formData, (progressEvent) => {
+                // Calculate progress percentage
+                if (progressEvent.total) {
+                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(progress);
+
+                    // When upload is complete but processing starts
+                    if (progress >= 100) {
                         setUploadStage('processing');
-                        return 90;
                     }
-                    return prev + Math.random() * 10;
-                });
-            }, 500);
+                }
+            });
 
-            const response = await videoAPI.createVideo(formData);
-
-            clearInterval(progressInterval);
-            setUploadProgress(100);
             setUploadStage('complete');
+            setUploadProgress(100);
 
             console.log('Upload response:', response);
 
@@ -119,9 +110,6 @@ const VideoUpload = () => {
                 }
             }, 1000);
         } catch (error) {
-            if (progressInterval) {
-                clearInterval(progressInterval);
-            }
             console.error('Upload error details:', {
                 error,
                 response: error.response,
@@ -220,16 +208,7 @@ const VideoUpload = () => {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
-    const formatDuration = (seconds) => {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = Math.floor(seconds % 60);
-
-        if (hours > 0) {
-            return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-        return `${minutes}:${secs.toString().padStart(2, '0')}`;
-    };
+    // Removed formatDuration function
 
     return (
         <div className="max-w-4xl mx-auto p-6">
@@ -319,9 +298,9 @@ const VideoUpload = () => {
                         )}
                     </div>
                 </div>
-                {/* Title, Description, and Duration */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2">
+                {/* Title and Description */}
+                <div className="grid grid-cols-1 gap-6">
+                    <div>
                         <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Title *
                         </label>
@@ -342,23 +321,6 @@ const VideoUpload = () => {
                     </div>
 
                     <div>
-                        <label htmlFor="duration" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Duration (seconds) *
-                        </label>
-                        <input
-                            type="number"
-                            id="duration"
-                            name="duration"
-                            required
-                            min="1"
-                            className="input-field"
-                            placeholder="Enter duration in seconds"
-                            value={formData.duration}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    <div className="lg:col-span-3">
                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Description *
                         </label>

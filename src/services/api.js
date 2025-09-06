@@ -4,9 +4,10 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: 'https://madhutube-backend.onrender.com/api/v1',
   withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // Remove Content-Type header to allow browser to set it automatically for FormData
+  // headers: {
+  //   'Content-Type': 'application/json',
+  // },
 });
 
 // Request interceptor to add auth token
@@ -16,6 +17,13 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // For FormData requests, let the browser set the Content-Type header automatically
+    // This is important for proper boundary generation in multipart requests
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+
     return config;
   },
   (error) => {

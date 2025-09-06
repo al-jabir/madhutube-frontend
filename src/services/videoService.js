@@ -12,7 +12,7 @@ export const videoAPI = {
   },
 
   // Create new video
-  createVideo: async (videoData) => {
+  createVideo: async (videoData, onUploadProgress) => {
     const formData = new FormData();
 
     // Log the input data
@@ -52,7 +52,9 @@ export const videoAPI = {
 
     // When sending FormData, let the browser set the Content-Type header automatically
     // by not specifying it explicitly, which allows for proper boundary generation
-    return api.post('/videos', formData);
+    return api.post('/videos', formData, {
+      onUploadProgress: onUploadProgress
+    });
   },
 
   // Update video
