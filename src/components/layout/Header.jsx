@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import ThemeToggle from '../ui/ThemeToggle.jsx';
@@ -13,8 +13,57 @@ import {
 const Header = ({ onMenuToggle }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
     const { user, logout, isAuthenticated } = useAuth();
     const navigate = useNavigate();
+
+    const notificationRef = useRef(null);
+    const userMenuRef = useRef(null);
+
+    // Mock notification count - in a real app, this would come from context or API
+    const [notificationCount, setNotificationCount] = useState(3);
+
+    // Mock notifications data - in a real app, this would come from context or API
+    const [notifications, setNotifications] = useState([
+        {
+            id: 1,
+            title: "New Subscriber",
+            message: "John Doe subscribed to your channel",
+            time: "2 hours ago",
+            read: false
+        },
+        {
+            id: 2,
+            title: "Video Liked",
+            message: "Your video 'How to Build a React App' was liked by 100 people",
+            time: "5 hours ago",
+            read: true
+        },
+        {
+            id: 3,
+            title: "Comment Reply",
+            message: "Jane Smith replied to your comment",
+            time: "1 day ago",
+            read: false
+        }
+    ]);
+
+    // Handle click outside to close dropdowns
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+                setShowNotifications(false);
+            }
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+                setShowUserMenu(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -26,7 +75,28 @@ const Header = ({ onMenuToggle }) => {
     const handleLogout = async () => {
         await logout();
         setShowUserMenu(false);
+        setShowNotifications(false);
         navigate('/');
+    };
+
+    const markAsRead = (id) => {
+        // In a real app, this would update the notification status in the backend
+        setNotifications(prevNotifications =>
+            prevNotifications.map(notification =>
+                notification.id === id ? { ...notification, read: true } : notification
+            )
+        );
+        console.log(`Marking notification ${id} as read`);
+    };
+
+    const markAllAsRead = () => {
+        // In a real app, this would update all notifications as read in the backend
+        setNotifications(prevNotifications =>
+            prevNotifications.map(notification => ({ ...notification, read: true }))
+        );
+        setNotificationCount(0);
+        console.log("Marking all notifications as read");
+        setShowNotifications(false);
     };
 
     return (
@@ -83,14 +153,84 @@ const Header = ({ onMenuToggle }) => {
                             >
                                 <VideoCameraIcon className="h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform duration-200" />
                             </Link>
-                            <button className="btn-icon group relative hidden sm:flex">
-                                <BellIcon className="h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform duration-200" />
-                                {/* Notification badge */}
-                                <span className="absolute top-1 right-1 w-2 h-2 bg-youtube-red rounded-full"></span>
-                            </button>
-                            <div className="relative">
+                            <div className="relative" ref={notificationRef}>
                                 <button
-                                    onClick={() => setShowUserMenu(!showUserMenu)}
+                                    onClick={() => {
+                                        setShowNotifications(!showNotifications);
+                                        setShowUserMenu(false);
+                                    }}
+                                    className="btn-icon group relative hidden sm:flex items-center justify-center"
+                                >
+                                    <BellIcon className="h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform duration-200" />
+                                    {/* Notification badge */}
+                                    {notificationCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 bg-youtube-red text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
+                                            {notificationCount > 9 ? '9+' : notificationCount}
+                                        </span>
+                                    )}
+                                </button>
+
+                                {/* Notification dropdown */}
+                                {showNotifications && (
+                                    <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-youtube-gray rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-2 slide-up z-50">
+                                        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                                            <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                                            <button
+                                                onClick={markAllAsRead}
+                                                className="text-sm text-youtube-red hover:text-youtube-hover"
+                                            >
+                                                Mark all as read
+                                            </button>
+                                        </div>
+
+                                        <div className="max-h-96 overflow-y-auto">
+                                            {notifications.length > 0 ? (
+                                                notifications.map((notification) => (
+                                                    <div
+                                                        key={notification.id}
+                                                        className={`px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 cursor-pointer ${!notification.read ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                                                        onClick={() => {
+                                                            markAsRead(notification.id);
+                                                            setShowNotifications(false);
+                                                        }}
+                                                    >
+                                                        <div className="flex justify-between">
+                                                            <h4 className="font-medium text-gray-900 dark:text-white">{notification.title}</h4>
+                                                            {!notification.read && (
+                                                                <span className="h-2 w-2 bg-youtube-red rounded-full"></span>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{notification.message}</p>
+                                                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{notification.time}</p>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="px-4 py-6 text-center">
+                                                    <BellIcon className="h-12 w-12 mx-auto text-gray-400" />
+                                                    <p className="mt-2 text-gray-600 dark:text-gray-400">No notifications yet</p>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 text-center">
+                                            <Link
+                                                to="/profile?tab=notifications"
+                                                className="text-sm text-youtube-red hover:text-youtube-hover font-medium"
+                                                onClick={() => setShowNotifications(false)}
+                                            >
+                                                View all notifications
+                                            </Link>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="relative" ref={userMenuRef}>
+                                <button
+                                    onClick={() => {
+                                        setShowUserMenu(!showUserMenu);
+                                        setShowNotifications(false);
+                                    }}
                                     className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
                                 >
                                     {user?.avatar ? (
@@ -124,18 +264,18 @@ const Header = ({ onMenuToggle }) => {
                                             onClick={() => setShowUserMenu(false)}
                                         >
                                             <svg className="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.724 0 3.35a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c-.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                             </svg>
                                             Settings
                                         </Link>
                                         <Link
-                                            to="/notifications"
+                                            to="/profile?tab=notifications"
                                             className="flex items-center px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
                                             onClick={() => setShowUserMenu(false)}
                                         >
                                             <BellIcon className="h-5 w-5 mr-3" />
-                                            Notifications Demo
+                                            Notifications
                                         </Link>
                                         <hr className="my-2 border-gray-200 dark:border-gray-700" />
                                         <button
