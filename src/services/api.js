@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: 'https://madhutube-backend.onrender.com/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1',
   withCredentials: true,
   // Remove Content-Type header to allow browser to set it automatically for FormData
   // headers: {
@@ -46,7 +46,7 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
           const response = await axios.post(
-            'https://madhutube-backend.onrender.com/api/v1/users/refresh-token',
+            import.meta.env.VITE_REFRESH_TOKEN_URL || 'http://localhost:5000/api/v1/users/refresh-token',
             { refreshToken },
             { withCredentials: true }
           );

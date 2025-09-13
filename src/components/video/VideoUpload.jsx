@@ -30,6 +30,9 @@ const VideoUpload = () => {
     const videoInputRef = useRef(null);
     const thumbnailInputRef = useRef(null);
 
+    // 100MB size limit in bytes
+    const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
+
     const { user } = useAuth();
     const navigate = useNavigate();
 
@@ -63,6 +66,12 @@ const VideoUpload = () => {
 
         if (!formData.thumbnail) {
             setError('Please select a thumbnail image');
+            return;
+        }
+
+        // Validate video file size
+        if (formData.videoFile.size > MAX_VIDEO_SIZE) {
+            setError(`Video file size exceeds 100MB limit. Current size: ${formatFileSize(formData.videoFile.size)}`);
             return;
         }
 
@@ -176,6 +185,12 @@ const VideoUpload = () => {
             const file = e.target.files[0];
             if (file) {
                 if (e.target.name === 'videoFile') {
+                    // Check file size before processing
+                    if (file.size > MAX_VIDEO_SIZE) {
+                        setError(`Video file size exceeds 100MB limit. Current size: ${formatFileSize(file.size)}`);
+                        return;
+                    }
+
                     const url = URL.createObjectURL(file);
                     setPreviewUrl(url);
 
@@ -231,6 +246,12 @@ const VideoUpload = () => {
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
             const file = e.dataTransfer.files[0];
             if (file.type.startsWith('video/')) {
+                // Check file size before processing
+                if (file.size > MAX_VIDEO_SIZE) {
+                    setError(`Video file size exceeds 100MB limit. Current size: ${formatFileSize(file.size)}`);
+                    return;
+                }
+
                 const url = URL.createObjectURL(file);
                 setPreviewUrl(url);
 
@@ -321,7 +342,7 @@ const VideoUpload = () => {
                                     className="hidden"
                                 />
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
-                                    Supported formats: MP4, AVI, MOV, WMV. Max size: 2GB
+                                    Supported formats: MP4, AVI, MOV, WMV. Max size: 100MB
                                 </p>
                             </div>
                         ) : (
