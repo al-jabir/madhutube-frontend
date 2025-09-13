@@ -36,8 +36,8 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <NotificationProvider>
+        <NotificationProvider>
+          <AuthProvider>
             <RealTimeProvider>
               <Router>
                 <Routes>
@@ -110,8 +110,8 @@ function App() {
                 </Routes>
               </Router>
             </RealTimeProvider>
-          </NotificationProvider>
-        </AuthProvider>
+          </AuthProvider>
+        </NotificationProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

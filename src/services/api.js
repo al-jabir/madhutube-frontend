@@ -39,7 +39,8 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Handle 401 Unauthorized errors (except for refresh token requests)
+    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/refresh-token')) {
       originalRequest._retry = true;
 
       try {
@@ -59,10 +60,14 @@ api.interceptors.response.use(
           return api(originalRequest);
         }
       } catch (refreshError) {
-        // Refresh failed, redirect to login
+        // Refresh failed, clear tokens and redirect to login
+        console.error('Token refresh failed:', refreshError);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+        // Only redirect if we're in a browser environment and not already on login page
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }

@@ -53,7 +53,7 @@ const NotificationItem = ({ notification, onRemove }) => {
 
     return (
         <div
-            className={`${bgColors[notification.type]} ${textColors[notification.type]} border rounded-lg p-4 shadow-lg max-w-md w-full transition-all duration-300 transform translate-x-0`}
+            className={`${bgColors[notification.type]} ${textColors[notification.type]} border rounded-lg p-4 shadow-lg max-w-md w-full transition-all duration-300 transform translate-x-0 opacity-100 animate-fade-in-up`}
         >
             <div className="flex items-start">
                 <IconComponent className="h-5 w-5 flex-shrink-0 mt-0.5" />

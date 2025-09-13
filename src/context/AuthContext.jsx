@@ -20,13 +20,56 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-          const response = await authAPI.getCurrentUser();
-          setUser(response.data.data);
+        const accessToken = localStorage.getItem('accessToken');
+        const refreshToken = localStorage.getItem('refreshToken');
+
+        // Check if we have tokens
+        if (accessToken && refreshToken) {
+          try {
+            // Try to get current user with existing access token
+            const response = await authAPI.getCurrentUser();
+            setUser(response.data.data);
+          } catch (error) {
+            // If getting user fails, token might be expired
+            // Try to refresh the token
+            if (error.response?.status === 401) {
+              try {
+                const refreshResponse = await authAPI.refreshToken();
+                const { accessToken: newAccessToken } = refreshResponse.data.data;
+
+                // Store new access token
+                localStorage.setItem('accessToken', newAccessToken);
+
+                // Try to get current user again with refreshed token
+                const userResponse = await authAPI.getCurrentUser();
+                setUser(userResponse.data.data);
+              } catch (refreshError) {
+                // Refresh failed, clear tokens
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                setUser(null);
+              }
+            } else {
+              // Some other error, but keep tokens as they might still be valid
+              // This could be a network error or other temporary issue
+              // We'll try to use existing tokens
+              console.warn('Error getting current user, but keeping existing tokens:', error);
+              // Try one more time to verify
+              try {
+                const retryResponse = await authAPI.getCurrentUser();
+                setUser(retryResponse.data.data);
+              } catch (retryError) {
+                console.error('Retry failed, clearing tokens:', retryError);
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                setUser(null);
+              }
+            }
+          }
         }
       } catch (error) {
-        // Token might be expired or invalid
+        // General error, clear tokens
+        console.error('General auth error, clearing tokens:', error);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         setUser(null);
@@ -44,13 +87,11 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-
       const response = await authAPI.login(credentials);
-
 
       const { user: userData, accessToken, refreshToken } = response.data.data;
 
-      // Store tokens
+      // Store tokens with expiration checks
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
 
@@ -59,9 +100,13 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true, user: userData };
     } catch (error) {
-
       const message = error.response?.data?.message || 'Login failed';
       setError(message);
+
+      // Clear any existing tokens on failed login
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+
       return { success: false, message };
     } finally {
       setLoading(false);
@@ -74,9 +119,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-
       const response = await authAPI.register(userData);
-
 
       const { user: newUser, accessToken, refreshToken } = response.data.data;
 
@@ -92,6 +135,11 @@ export const AuthProvider = ({ children }) => {
       console.error('Registration error:', error);
       const message = error.response?.data?.message || 'Registration failed';
       setError(message);
+
+      // Clear any existing tokens on failed registration
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+
       return { success: false, message };
     } finally {
       setLoading(false);

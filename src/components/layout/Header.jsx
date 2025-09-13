@@ -129,6 +129,14 @@ const Header = ({ onMenuToggle }) => {
                                             </svg>
                                             Settings
                                         </Link>
+                                        <Link
+                                            to="/notifications"
+                                            className="flex items-center px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                                            onClick={() => setShowUserMenu(false)}
+                                        >
+                                            <BellIcon className="h-5 w-5 mr-3" />
+                                            Notifications Demo
+                                        </Link>
                                         <hr className="my-2 border-gray-200 dark:border-gray-700" />
                                         <button
                                             onClick={handleLogout}
