@@ -159,8 +159,13 @@ client/
 3. **Environment Setup**
    Create a `.env` file in the client directory:
    ```env
+   # Development
    VITE_API_BASE_URL=http://localhost:5000/api/v1
    VITE_REFRESH_TOKEN_URL=http://localhost:5000/api/v1/users/refresh-token
+
+   # Production (example)
+   # VITE_API_BASE_URL=https://madhutube-backend.onrender.com/api/v1
+   # VITE_REFRESH_TOKEN_URL=https://madhutube-backend.onrender.com/api/v1/users/refresh-token
    ```
 
 4. **Start the development server**
@@ -272,6 +277,47 @@ npm run preview
 ```
 
 The build artifacts will be stored in the `dist/` directory.
+
+## 🚀 Deployment
+
+### Vercel Deployment
+
+1. **Connect your repository** to Vercel
+2. **Set the root directory** to `client`
+3. **Configure environment variables** in Vercel dashboard:
+   ```env
+   VITE_API_BASE_URL=https://your-backend-url.onrender.com/api/v1
+   VITE_REFRESH_TOKEN_URL=https://your-backend-url.onrender.com/api/v1/users/refresh-token
+   ```
+4. **Deploy automatically** on push to main branch
+
+### Other Deployment Platforms
+
+#### Netlify
+1. **Connect your repository**
+2. **Set build directory** to `client`
+3. **Set build command** to `npm run build`
+4. **Set publish directory** to `client/dist`
+5. **Configure environment variables**
+
+#### Manual Deployment
+```bash
+# Build for production
+npm run build
+
+# Upload dist/ folder to your hosting provider
+```
+
+### Environment Variables for Production
+
+Make sure to set these environment variables in your deployment platform:
+
+- `VITE_API_BASE_URL`: Your backend API URL
+- `VITE_REFRESH_TOKEN_URL`: Your backend refresh token endpoint
+
+### CORS Configuration
+
+Ensure your backend is configured to accept requests from your deployed frontend URL. The backend should include your production domain in its CORS allowlist.
 
 ## 🤝 Contributing
 
