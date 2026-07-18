@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { NotificationProvider } from './context/NotificationContext.jsx';
@@ -18,7 +18,7 @@ import VideoUpload from './components/video/VideoUpload.jsx';
 import Search from './pages/Search.jsx';
 import PlaylistDetail from './pages/PlaylistDetail.jsx';
 import SubscriptionFeed from './pages/SubscriptionFeed.jsx';
-import './App.css';
+// no extra CSS import needed
 
 // Create a client for React Query
 const queryClient = new QueryClient({

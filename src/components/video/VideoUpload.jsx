@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { videoAPI } from '../../services/videoService.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import {
