@@ -94,4 +94,19 @@ export const authAPI = {
   getWatchHistory: async () => {
     return api.get('/users/history');
   },
+
+  // Forgot password - send reset email
+  forgotPassword: async (email) => {
+    return api.post('/users/forgot-password', { email });
+  },
+
+  // Verify reset token
+  verifyResetToken: async (token) => {
+    return api.get(`/users/reset-password/${token}`);
+  },
+
+  // Reset password with token
+  resetPassword: async (token, password) => {
+    return api.post(`/users/reset-password/${token}`, { password });
+  },
 };

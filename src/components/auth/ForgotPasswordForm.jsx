@@ -10,7 +10,7 @@ const ForgotPasswordForm = ({ onBackToLogin }) => {
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [emailSent, setEmailSent] = useState(false);
-    const { resetPassword } = useAuth();
+    const { forgotPassword } = useAuth();
     const { success, error } = useNotification();
 
     const handleSubmit = async (e) => {
@@ -23,7 +23,7 @@ const ForgotPasswordForm = ({ onBackToLogin }) => {
 
         try {
             setIsLoading(true);
-            await resetPassword(email);
+            await forgotPassword(email);
             setEmailSent(true);
             success('Password reset email sent! Check your inbox.');
         } catch (err) {

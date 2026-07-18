@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTheme } from '../context/ThemeContext.jsx';
 import {
     CogIcon,
     BellIcon,
@@ -12,8 +13,8 @@ import {
 } from '@heroicons/react/24/outline';
 
 const Settings = () => {
+    const { theme, setTheme } = useTheme();
     const [settings, setSettings] = useState({
-        theme: 'system',
         language: 'en',
         autoplay: true,
         notifications: true,
@@ -32,6 +33,9 @@ const Settings = () => {
             ...prev,
             [key]: value
         }));
+        if (key === 'theme') {
+            setTheme(value);
+        }
     };
 
     const settingsCategories = [
@@ -220,7 +224,7 @@ const Settings = () => {
                                                     </label>
                                                 ) : (
                                                     <select
-                                                        value={settings[setting.key]}
+                                                        value={setting.key === 'theme' ? theme : settings[setting.key]}
                                                         onChange={(e) => handleSettingChange(setting.key, e.target.value)}
                                                         className="input-field w-48"
                                                     >

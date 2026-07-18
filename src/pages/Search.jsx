@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router';
+import { videoAPI } from '../services/videoService.js';
 import VideoList from '../components/video/VideoList.jsx';
 import {
     FunnelIcon,
@@ -69,7 +70,6 @@ const Search = () => {
     };
 
     useEffect(() => {
-        // Update URL with filter parameters
         const params = new URLSearchParams();
         if (query) params.set('q', query);
         if (filters.sortBy !== 'relevance') params.set('sort', filters.sortBy);
@@ -80,6 +80,12 @@ const Search = () => {
         navigate(`/search?${params.toString()}`, { replace: true });
     }, [filters, query, navigate]);
 
+    const fetchSearchResults = useCallback(async () => {
+        const params = {};
+        if (query) params.query = query;
+        return videoAPI.getAllVideos(params);
+    }, [query]);
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-youtube-dark">
             <div className="max-w-7xl mx-auto px-4 py-6">
@@ -87,11 +93,15 @@ const Search = () => {
                 <div className="mb-6">
                     <div className="flex items-center justify-between mb-4">
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                            Search results for "{query}"
+                            {query ? (
+                                <>Results for "<span className="text-youtube-red">{query}</span>"</>
+                            ) : (
+                                'All Videos'
+                            )}
                         </h1>
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className="btn-secondary flex items-center space-x-2"
+                            className="flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-youtube-gray text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
                         >
                             <FunnelIcon className="h-5 w-5" />
                             <span>Filters</span>
@@ -111,7 +121,7 @@ const Search = () => {
                                 <select
                                     value={filters.sortBy}
                                     onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                                    className="input-field"
+                                    className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-youtube-red focus:border-transparent outline-none"
                                 >
                                     {sortOptions.map(option => (
                                         <option key={option.value} value={option.value}>
@@ -130,7 +140,7 @@ const Search = () => {
                                 <select
                                     value={filters.uploadDate}
                                     onChange={(e) => handleFilterChange('uploadDate', e.target.value)}
-                                    className="input-field"
+                                    className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-youtube-red focus:border-transparent outline-none"
                                 >
                                     {uploadDateOptions.map(option => (
                                         <option key={option.value} value={option.value}>
@@ -149,7 +159,7 @@ const Search = () => {
                                 <select
                                     value={filters.duration}
                                     onChange={(e) => handleFilterChange('duration', e.target.value)}
-                                    className="input-field"
+                                    className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-youtube-red focus:border-transparent outline-none"
                                 >
                                     {durationOptions.map(option => (
                                         <option key={option.value} value={option.value}>
@@ -168,7 +178,7 @@ const Search = () => {
                                 <select
                                     value={filters.type}
                                     onChange={(e) => handleFilterChange('type', e.target.value)}
-                                    className="input-field"
+                                    className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-youtube-red focus:border-transparent outline-none"
                                 >
                                     {typeOptions.map(option => (
                                         <option key={option.value} value={option.value}>
@@ -182,10 +192,8 @@ const Search = () => {
                         {/* Clear Filters */}
                         <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
                             <button
-                                onClick={() => {
-                                    clearFilters();
-                                }}
-                                className="text-sm text-youtube-red hover:text-youtube-hover"
+                                onClick={clearFilters}
+                                className="text-sm text-youtube-red hover:text-red-700 dark:hover:text-red-400 font-medium transition-colors duration-200"
                             >
                                 Clear all filters
                             </button>
@@ -197,7 +205,7 @@ const Search = () => {
                 <div className="space-y-6">
                     {!query ? (
                         <div className="text-center py-12">
-                            <EyeIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                            <EyeIcon className="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500 mb-4" />
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                                 Start searching
                             </h3>
@@ -209,8 +217,7 @@ const Search = () => {
                         <VideoList
                             title={null}
                             emptyMessage={`No results found for "${query}"`}
-                            // In a real app, this would pass search parameters to the API
-                            apiCall={null}
+                            apiCall={fetchSearchResults}
                         />
                     )}
                 </div>

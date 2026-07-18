@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme {
   --color-youtube-red: #FF0000;
   --color-youtube-dark: #0F0F0F;
@@ -38,20 +40,19 @@
     border-color: var(--color-gray-200, currentColor);
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     background-color: white;
     color: rgb(17 24 39);
     font-family: var(--font-youtube);
   }
 
-  .dark body,
-  body:is(.dark *) {
+  .dark body {
     background-color: var(--color-youtube-dark);
     color: white;
-  }
-
-  html {
-    scroll-behavior: smooth;
   }
 }
 
@@ -394,17 +395,19 @@
 
 ::-webkit-scrollbar-track {
   background-color: rgb(243 244 246);
-  .dark & {
-    background-color: var(--color-youtube-gray);
-  }
+}
+
+.dark ::-webkit-scrollbar-track {
+  background-color: var(--color-youtube-gray);
 }
 
 ::-webkit-scrollbar-thumb {
   background-color: rgb(156 163 175);
   border-radius: 9999px;
-  .dark & {
-    background-color: rgb(75 85 99);
-  }
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgb(75 85 99);
 }
 
 ::-webkit-scrollbar-thumb:hover {

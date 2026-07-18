@@ -20,7 +20,7 @@ const ResetPasswordForm = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [tokenValid, setTokenValid] = useState(null);
-    const { resetPasswordConfirm, verifyResetToken } = useAuth();
+    const { resetPassword, verifyResetToken } = useAuth();
     const { success, error } = useNotification();
 
     const token = searchParams.get('token');
@@ -35,9 +35,10 @@ const ResetPasswordForm = () => {
 
     const verifyToken = async () => {
         try {
-            await verifyResetToken(token);
-            setTokenValid(true);
-        } catch (err) {
+            const valid = await verifyResetToken(token);
+            setTokenValid(valid);
+            if (!valid) error('Invalid or expired reset token');
+        } catch {
             setTokenValid(false);
             error('Invalid or expired reset token');
         }
@@ -84,7 +85,7 @@ const ResetPasswordForm = () => {
 
         try {
             setIsLoading(true);
-            await resetPasswordConfirm(token, formData.password);
+            await resetPassword(token, formData.password);
             success('Password reset successfully!');
             navigate('/login');
         } catch (err) {

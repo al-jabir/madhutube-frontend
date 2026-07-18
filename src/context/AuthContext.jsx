@@ -123,6 +123,42 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
+  // Forgot password - send reset email
+  const forgotPassword = async (email) => {
+    try {
+      setError(null);
+      const response = await authAPI.forgotPassword(email);
+      return { success: true, message: response.data.message };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to send reset email';
+      setError(message);
+      return { success: false, message };
+    }
+  };
+
+  // Verify reset token
+  const verifyResetToken = async (token) => {
+    try {
+      await authAPI.verifyResetToken(token);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Reset password with token
+  const resetPassword = async (token, password) => {
+    try {
+      setError(null);
+      const response = await authAPI.resetPassword(token, password);
+      return { success: true, message: response.data.message };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to reset password';
+      setError(message);
+      return { success: false, message };
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -132,6 +168,9 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUser,
     clearError,
+    forgotPassword,
+    verifyResetToken,
+    resetPassword,
     isAuthenticated: !!user,
   };
 

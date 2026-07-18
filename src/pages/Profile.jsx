@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useNotification } from '../context/NotificationContext.jsx';
+import { authAPI } from '../services/authService.js';
 import {
     UserCircleIcon,
     PencilIcon,
@@ -19,6 +21,8 @@ import {
 
 const Profile = () => {
     const { user, updateUser } = useAuth();
+    const { success, error: showError } = useNotification();
+    const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState('general');
     const [editMode, setEditMode] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -57,10 +61,42 @@ const Profile = () => {
         });
     };
 
-    const handleSave = () => {
-        // API call to update user profile
-        updateUser(formData);
-        setEditMode(false);
+    const handleUpdatePassword = async () => {
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            showError('New passwords do not match');
+            return;
+        }
+        if (!passwordData.currentPassword || !passwordData.newPassword) {
+            showError('Please fill in all password fields');
+            return;
+        }
+        try {
+            setSaving(true);
+            await authAPI.changePassword({
+                oldPassword: passwordData.currentPassword,
+                newPassword: passwordData.newPassword,
+            });
+            setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+            success('Password updated successfully!');
+        } catch (err) {
+            showError(err?.response?.data?.message || 'Failed to update password');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleSave = async () => {
+        try {
+            setSaving(true);
+            await authAPI.updateAccount({ fullname: formData.fullName });
+            updateUser({ ...user, fullname: formData.fullName });
+            setEditMode(false);
+            success('Profile updated successfully!');
+        } catch (err) {
+            showError(err?.response?.data?.message || 'Failed to update profile');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleCancel = () => {
@@ -75,19 +111,29 @@ const Profile = () => {
         setEditMode(false);
     };
 
-    const handleAvatarChange = (e) => {
+    const handleAvatarChange = async (e) => {
         const file = e.target.files[0];
-        if (file) {
-            // Handle avatar upload
-            console.log('Avatar file:', file);
+        if (!file) return;
+        try {
+            await authAPI.updateAvatar(file);
+            const previewUrl = URL.createObjectURL(file);
+            updateUser({ ...user, avatar: previewUrl });
+            success('Avatar updated successfully!');
+        } catch (err) {
+            showError(err?.response?.data?.message || 'Failed to update avatar');
         }
     };
 
-    const handleCoverChange = (e) => {
+    const handleCoverChange = async (e) => {
         const file = e.target.files[0];
-        if (file) {
-            // Handle cover image upload
-            console.log('Cover file:', file);
+        if (!file) return;
+        try {
+            await authAPI.updateCoverImage(file);
+            const previewUrl = URL.createObjectURL(file);
+            updateUser({ ...user, coverImage: previewUrl });
+            success('Cover image updated successfully!');
+        } catch (err) {
+            showError(err?.response?.data?.message || 'Failed to update cover image');
         }
     };
 
@@ -362,9 +408,10 @@ const Profile = () => {
                                             <button
                                                 onClick={handleSave}
                                                 className="btn-primary flex items-center space-x-2"
+                                                disabled={saving}
                                             >
                                                 <CheckIcon className="h-4 w-4" />
-                                                <span>Save Changes</span>
+                                                <span>{saving ? 'Saving...' : 'Save Changes'}</span>
                                             </button>
                                         </div>
                                     )}
@@ -438,8 +485,8 @@ const Profile = () => {
                                                 </div>
                                             </div>
 
-                                            <button className="btn-primary">
-                                                Update Password
+                                            <button className="btn-primary" onClick={handleUpdatePassword} disabled={saving}>
+                                                {saving ? 'Updating...' : 'Update Password'}
                                             </button>
                                         </div>
                                     </div>
